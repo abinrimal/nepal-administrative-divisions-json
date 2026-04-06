@@ -219,7 +219,23 @@ function createCollapsibleItem(title, children) {
 
 // ---------------- COPY TO CLIPBOARD ----------------
 copyBtn.addEventListener('click', () => {
-  navigator.clipboard.writeText(resultsDiv.textContent)
+  const selectedProvince = provinceDropdown.value;
+  const selectedDistrict = districtDropdown.value;
+  const selectedLocal = localDropdown.value;
+
+  // Filter JSON based on selections
+  const filtered = data.map(p => {
+    if (selectedProvince && p.name_en !== selectedProvince) return null;
+    const districts = p.districts.map(d => {
+      if (selectedDistrict && d.name_en !== selectedDistrict) return null;
+      const locals = d.local_levels.filter(l => !selectedLocal || l.name_en === selectedLocal);
+      return {...d, local_levels: locals};
+    }).filter(Boolean);
+    return {...p, districts};
+  }).filter(Boolean);
+
+  // Copy properly formatted JSON
+  navigator.clipboard.writeText(JSON.stringify(filtered, null, 2))
     .then(() => alert('JSON copied to clipboard!'))
     .catch(err => alert('Failed to copy JSON: '+err));
 });
