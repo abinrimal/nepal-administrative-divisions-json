@@ -36,7 +36,7 @@ input#searchBox {
 #copyBtn {
   position: absolute;
   top: 0;
-  left: 0;
+  right: 0;
   padding: 5px 10px;
   cursor: pointer;
 }
@@ -44,7 +44,8 @@ input#searchBox {
 #results {
   border: 1px solid #ccc;
   padding: 10px;
-  max-height: 400px;
+  max-height: calc(100vh - 600px);
+  overflow-y: auto;
   overflow: auto;
   background: #f9f9f9;
   white-space: pre-wrap;
