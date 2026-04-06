@@ -6,28 +6,45 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Nepal Administrative Divisions Search</h1>
+  <div class="container">
+    <h1>Nepal Administrative Divisions</h1>
+    <p>Search and explore provinces, districts, and local levels in Nepal. Select from dropdowns or type to search.</p>
 
-    <select id="provinceDropdown">
-    <option value="">Select Province</option>
-    </select>
+    <div class="dropdowns">
+      <div class="dropdown-group">
+        <label for="provinceDropdown">Province:</label>
+        <select id="provinceDropdown">
+          <option value="">Select Province</option>
+        </select>
+      </div>
 
-    <select id="districtDropdown" disabled>
-    <option value="">Select District</option>
-    </select>
+      <div class="dropdown-group">
+        <label for="districtDropdown">District:</label>
+        <select id="districtDropdown" disabled>
+          <option value="">Select District</option>
+        </select>
+      </div>
 
-    <select id="localDropdown" disabled>
-    <option value="">Select Local Level</option>
-    </select>
-
-    <input type="text" id="searchBox" placeholder="Search for Province, District or Local Level" />
-    <div id="suggestions" class="suggestions"></div>
-
-    <div id="resultsContainer">
-        <button id="copyBtn">Copy JSON</button>
-        <pre id="results"></pre>
+      <div class="dropdown-group">
+        <label for="localDropdown">Local Level:</label>
+        <select id="localDropdown" disabled>
+          <option value="">Select Local Level</option>
+        </select>
+      </div>
     </div>
 
-    <script src="script.js"></script>
+    <div class="search-container">
+      <label for="searchBox">Search:</label>
+      <input type="text" id="searchBox" placeholder="Type Province, District or Local Level" autocomplete="off" />
+      <div id="suggestions" class="suggestions"></div>
+    </div>
+
+    <div id="resultsContainer">
+      <button id="copyBtn">Copy JSON</button>
+      <pre id="results"></pre>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>

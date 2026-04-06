@@ -16,13 +16,13 @@ async function loadData() {
       .then(json => json.provinces);
 
     populateProvinces();
-    displayResultsAsJSON(data); // Show full dataset initially
+    displayCollapsibleJSON(data);
   } catch (err) {
     console.error('Error loading JSON:', err);
   }
 }
 
-// ---------------- Dropdown Population ----------------
+// ---------------- Dropdowns ----------------
 function populateProvinces() {
   data.forEach(p => {
     const option = document.createElement('option');
@@ -92,7 +92,7 @@ function populateLocals(district) {
   localDropdown.disabled = false;
 }
 
-// ---------------- TYPEAHEAD AUTOCOMPLETE ----------------
+// ---------------- TYPEAHEAD ----------------
 searchBox.addEventListener('input', () => {
   const query = searchBox.value.toLowerCase();
   suggestionsDiv.innerHTML = '';
@@ -163,9 +163,8 @@ function applySelection(match) {
   filterAndDisplayJSON();
 }
 
-// ---------------- FILTER & DISPLAY AS JSON ----------------
+// ---------------- FILTER & DISPLAY COLLAPSIBLE JSON ----------------
 function filterAndDisplayJSON() {
-  const query = searchBox.value.toLowerCase();
   const selectedProvince = provinceDropdown.value;
   const selectedDistrict = districtDropdown.value;
   const selectedLocal = localDropdown.value;
@@ -180,11 +179,42 @@ function filterAndDisplayJSON() {
     return {...p, districts};
   }).filter(Boolean);
 
-  displayResultsAsJSON(filtered);
+  displayCollapsibleJSON(filtered);
 }
 
-function displayResultsAsJSON(obj) {
-  resultsDiv.textContent = JSON.stringify(obj, null, 2);
+function displayCollapsibleJSON(arr) {
+  resultsDiv.innerHTML = '';
+  arr.forEach(p => {
+    const pDiv = createCollapsibleItem(`${p.name_en} (${p.name_ne})`, p.districts);
+    resultsDiv.appendChild(pDiv);
+  });
+}
+
+function createCollapsibleItem(title, children) {
+  const container = document.createElement('div');
+  container.className = 'collapsible-container';
+
+  const header = document.createElement('div');
+  header.className = 'collapsible-header';
+  header.textContent = title;
+
+  const content = document.createElement('div');
+  content.className = 'collapsible-content';
+
+  if (Array.isArray(children)) {
+    children.forEach(d => {
+      const dDiv = createCollapsibleItem(`${d.name_en} (${d.name_ne})`, d.local_levels);
+      content.appendChild(dDiv);
+    });
+  }
+
+  header.addEventListener('click', () => {
+    content.classList.toggle('active');
+  });
+
+  container.appendChild(header);
+  container.appendChild(content);
+  return container;
 }
 
 // ---------------- COPY TO CLIPBOARD ----------------
