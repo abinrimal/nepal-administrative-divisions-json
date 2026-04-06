@@ -6,6 +6,7 @@ const localDropdown = document.getElementById('localDropdown');
 const searchBox = document.getElementById('searchBox');
 const suggestionsDiv = document.getElementById('suggestions');
 const resultsDiv = document.getElementById('results');
+const copyBtn = document.getElementById('copyBtn');
 
 // Load JSON
 async function loadData() {
@@ -15,13 +16,13 @@ async function loadData() {
       .then(json => json.provinces);
 
     populateProvinces();
-    filterResults();
+    displayResultsAsJSON(data); // Show full dataset initially
   } catch (err) {
     console.error('Error loading JSON:', err);
   }
 }
 
-// Populate province dropdown
+// ---------------- Dropdown Population ----------------
 function populateProvinces() {
   data.forEach(p => {
     const option = document.createElement('option');
@@ -31,7 +32,6 @@ function populateProvinces() {
   });
 }
 
-// Update district dropdown
 provinceDropdown.addEventListener('change', () => {
   const selectedProvince = provinceDropdown.value;
   districtDropdown.innerHTML = '<option value="">Select District</option>';
@@ -40,16 +40,15 @@ provinceDropdown.addEventListener('change', () => {
 
   if (!selectedProvince) {
     districtDropdown.disabled = true;
-    filterResults();
+    filterAndDisplayJSON();
     return;
   }
 
   const province = data.find(p => p.name_en === selectedProvince);
   populateDistricts(province);
-  filterResults();
+  filterAndDisplayJSON();
 });
 
-// Update local dropdown
 districtDropdown.addEventListener('change', () => {
   const selectedProvince = provinceDropdown.value;
   const selectedDistrict = districtDropdown.value;
@@ -57,19 +56,18 @@ districtDropdown.addEventListener('change', () => {
 
   if (!selectedDistrict) {
     localDropdown.disabled = true;
-    filterResults();
+    filterAndDisplayJSON();
     return;
   }
 
   const province = data.find(p => p.name_en === selectedProvince);
   const district = province.districts.find(d => d.name_en === selectedDistrict);
   populateLocals(district);
-  filterResults();
+  filterAndDisplayJSON();
 });
 
-localDropdown.addEventListener('change', filterResults);
+localDropdown.addEventListener('change', filterAndDisplayJSON);
 
-// Populate dropdown helpers
 function populateDistricts(province) {
   districtDropdown.innerHTML = '<option value="">Select District</option>';
   province.districts.forEach(d => {
@@ -100,7 +98,7 @@ searchBox.addEventListener('input', () => {
   suggestionsDiv.innerHTML = '';
 
   if (!query) {
-    filterResults();
+    filterAndDisplayJSON();
     return;
   }
 
@@ -122,7 +120,6 @@ searchBox.addEventListener('input', () => {
     });
   });
 
-  // show top 10 suggestions
   matches.slice(0,10).forEach(m => {
     const div = document.createElement('div');
     div.className = 'suggestion-item';
@@ -134,10 +131,9 @@ searchBox.addEventListener('input', () => {
     suggestionsDiv.appendChild(div);
   });
 
-  filterResults();
+  filterAndDisplayJSON();
 });
 
-// Apply selection from suggestions
 function applySelection(match) {
   if (match.type === 'Province') {
     provinceDropdown.value = match.name;
@@ -164,48 +160,38 @@ function applySelection(match) {
   }
 
   searchBox.value = match.name;
-  filterResults();
+  filterAndDisplayJSON();
 }
 
-// ---------------- FILTER RESULTS ----------------
-function filterResults() {
+// ---------------- FILTER & DISPLAY AS JSON ----------------
+function filterAndDisplayJSON() {
   const query = searchBox.value.toLowerCase();
   const selectedProvince = provinceDropdown.value;
   const selectedDistrict = districtDropdown.value;
   const selectedLocal = localDropdown.value;
 
-  const results = [];
+  const filtered = data.map(p => {
+    if (selectedProvince && p.name_en !== selectedProvince) return null;
+    const districts = p.districts.map(d => {
+      if (selectedDistrict && d.name_en !== selectedDistrict) return null;
+      const locals = d.local_levels.filter(l => !selectedLocal || l.name_en === selectedLocal);
+      return {...d, local_levels: locals};
+    }).filter(Boolean);
+    return {...p, districts};
+  }).filter(Boolean);
 
-  data.forEach(p => {
-    if (selectedProvince && p.name_en !== selectedProvince) return;
-    if (p.name_en.toLowerCase().includes(query)) results.push({type:'Province', name:p.name_en, nepali:p.name_ne});
-
-    p.districts.forEach(d => {
-      if (selectedDistrict && d.name_en !== selectedDistrict) return;
-      if (d.name_en.toLowerCase().includes(query)) results.push({type:'District', name:d.name_en, nepali:d.name_ne});
-
-      d.local_levels.forEach(l => {
-        if (selectedLocal && l.name_en !== selectedLocal) return;
-        if (l.name_en.toLowerCase().includes(query)) results.push({type:'Local Level', name:l.name_en, nepali:l.name_ne, type_en:l.type_en});
-      });
-    });
-  });
-
-  displayResults(results);
+  displayResultsAsJSON(filtered);
 }
 
-// Display results
-function displayResults(results) {
-  resultsDiv.innerHTML = '';
-  if(results.length === 0){
-    resultsDiv.innerHTML = '<em>No results found</em>';
-    return;
-  }
-  results.forEach(r => {
-    const div = document.createElement('div');
-    div.innerHTML = `<strong>${r.type}</strong>: ${r.name} (${r.nepali || '-'}) ${r.type_en ? '- '+r.type_en : ''}`;
-    resultsDiv.appendChild(div);
-  });
+function displayResultsAsJSON(obj) {
+  resultsDiv.textContent = JSON.stringify(obj, null, 2);
 }
+
+// ---------------- COPY TO CLIPBOARD ----------------
+copyBtn.addEventListener('click', () => {
+  navigator.clipboard.writeText(resultsDiv.textContent)
+    .then(() => alert('JSON copied to clipboard!'))
+    .catch(err => alert('Failed to copy JSON: '+err));
+});
 
 window.onload = loadData;
