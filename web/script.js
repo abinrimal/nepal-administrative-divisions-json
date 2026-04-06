@@ -16,7 +16,7 @@ async function loadData() {
       .then(json => json.provinces);
 
     populateProvinces();
-    displayCollapsibleJSON(data);
+    displayJSONTree(data, true); // Fully expanded initially
   } catch (err) {
     console.error('Error loading JSON:', err);
   }
@@ -179,37 +179,42 @@ function filterAndDisplayJSON() {
     return {...p, districts};
   }).filter(Boolean);
 
-  displayCollapsibleJSON(filtered);
+  displayJSONTree(filtered, true); // fully expanded initially
 }
 
-function displayCollapsibleJSON(arr) {
+// ---------------- DISPLAY COLLAPSIBLE JSON WITH ARROWS ----------------
+function displayJSONTree(arr, expanded = false) {
   resultsDiv.innerHTML = '';
+  
   arr.forEach(p => {
-    const pDiv = createCollapsibleItem(`${p.name_en} (${p.name_ne})`, p.districts);
+    const pDiv = createCollapsibleItem(`${p.name_en} (${p.name_ne})`, p.districts, expanded);
     resultsDiv.appendChild(pDiv);
   });
 }
 
-function createCollapsibleItem(title, children) {
+function createCollapsibleItem(title, children, expanded) {
   const container = document.createElement('div');
   container.className = 'collapsible-container';
 
   const header = document.createElement('div');
   header.className = 'collapsible-header';
-  header.textContent = title;
+  header.innerHTML = `<span class="arrow">${expanded ? '▼' : '▶'}</span> ${title}`;
 
   const content = document.createElement('div');
   content.className = 'collapsible-content';
+  if (expanded) content.classList.add('active');
 
   if (Array.isArray(children)) {
     children.forEach(d => {
-      const dDiv = createCollapsibleItem(`${d.name_en} (${d.name_ne})`, d.local_levels);
+      const dDiv = createCollapsibleItem(`${d.name_en} (${d.name_ne})`, d.local_levels, expanded);
       content.appendChild(dDiv);
     });
   }
 
   header.addEventListener('click', () => {
     content.classList.toggle('active');
+    const arrow = header.querySelector('.arrow');
+    arrow.textContent = content.classList.contains('active') ? '▼' : '▶';
   });
 
   container.appendChild(header);
@@ -223,7 +228,6 @@ copyBtn.addEventListener('click', () => {
   const selectedDistrict = districtDropdown.value;
   const selectedLocal = localDropdown.value;
 
-  // Filter JSON based on selections
   const filtered = data.map(p => {
     if (selectedProvince && p.name_en !== selectedProvince) return null;
     const districts = p.districts.map(d => {
@@ -234,7 +238,6 @@ copyBtn.addEventListener('click', () => {
     return {...p, districts};
   }).filter(Boolean);
 
-  // Copy properly formatted JSON
   navigator.clipboard.writeText(JSON.stringify(filtered, null, 2))
     .then(() => alert('JSON copied to clipboard!'))
     .catch(err => alert('Failed to copy JSON: '+err));

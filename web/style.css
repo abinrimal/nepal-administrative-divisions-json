@@ -134,10 +134,19 @@ select {
   border-radius: 3px;
   margin-bottom: 2px;
   font-weight: bold;
+  display: flex;
+  align-items: center;
 }
 
 .collapsible-header:hover {
   background-color: #d0d0d0;
+}
+
+.arrow {
+  display: inline-block;
+  width: 16px;
+  text-align: center;
+  margin-right: 5px;
 }
 
 .collapsible-content {
