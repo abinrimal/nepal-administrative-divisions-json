@@ -2,6 +2,10 @@
 ![JSON Dataset](https://img.shields.io/badge/format-JSON-blue)
 ![Nepal Administrative Data](https://img.shields.io/badge/data-Nepal-red)
 
+## 🌐 View Interactive Web Version
+
+You can explore Nepal's administrative divisions interactively [here](https://abinrimal.github.io/nepal-administrative-divisions-json/web).
+
 # Nepal Administrative Divisions JSON 🇳🇵
 
 A clean, developer-friendly JSON dataset of Nepal's full administrative structure based on the Constitution of Nepal and the Local Government Operation Act.
