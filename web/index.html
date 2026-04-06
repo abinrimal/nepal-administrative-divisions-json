@@ -6,12 +6,24 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Nepal Administrative Divisions Search</h1>
+    <h1>Nepal Administrative Divisions Search</h1>
 
-  <input type="text" id="searchBox" placeholder="Search for Province, District or Local Level" />
+    <select id="provinceDropdown">
+    <option value="">Select Province</option>
+    </select>
 
-  <div id="results"></div>
+    <select id="districtDropdown" disabled>
+    <option value="">Select District</option>
+    </select>
 
-  <script src="script.js"></script>
+    <select id="localDropdown" disabled>
+    <option value="">Select Local Level</option>
+    </select>
+
+     <input type="text" id="searchBox" placeholder="Search for Province, District or Local Level" />
+
+    <div id="results"></div>
+
+    <script src="script.js"></script>
 </body>
 </html>
